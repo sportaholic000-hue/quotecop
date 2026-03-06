@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: quotecop
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: APP_URL
+        value: https://quotecop.onrender.com
+      - key: STRIPE_PRICE_ONE_TIME
+        sync: false
+      - key: STRIPE_PRICE_SUBSCRIPTION
+        sync: false
+    healthCheckPath: /health
+    numInstances: 1
+    region: oregon
