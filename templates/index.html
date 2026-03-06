@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuoteCop - Stop Getting Overcharged</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a0f; color: #e0e0e0; line-height: 1.6; }
+        
+        /* Nav */
+        nav { padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a1a2e; }
+        .logo { font-size: 1.5rem; font-weight: 800; color: #00d4aa; }
+        .logo span { color: #fff; }
+        nav a { color: #888; text-decoration: none; margin-left: 1.5rem; font-size: 0.9rem; }
+        nav a:hover { color: #00d4aa; }
+        
+        /* Hero */
+        .hero { text-align: center; padding: 5rem 2rem 3rem; max-width: 800px; margin: 0 auto; }
+        .hero h1 { font-size: 3rem; font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; }
+        .hero h1 .highlight { background: linear-gradient(135deg, #00d4aa, #00a8ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1.2rem; color: #888; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .hero-stats { display: flex; justify-content: center; gap: 3rem; margin-top: 2rem; }
+        .hero-stats .stat { text-align: center; }
+        .hero-stats .stat-num { font-size: 1.8rem; font-weight: 800; color: #00d4aa; }
+        .hero-stats .stat-label { font-size: 0.8rem; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+        
+        /* How it Works */
+        .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; max-width: 900px; margin: 3rem auto; padding: 0 2rem; }
+        .step { background: #111118; border: 1px solid #1a1a2e; border-radius: 12px; padding: 2rem; text-align: center; }
+        .step-num { width: 40px; height: 40px; background: linear-gradient(135deg, #00d4aa, #00a8ff); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-weight: 800; color: #000; }
+        .step h3 { margin-bottom: 0.5rem; color: #fff; }
+        .step p { font-size: 0.9rem; color: #888; }
+        
+        /* Main App */
+        .app-section { max-width: 900px; margin: 2rem auto; padding: 0 2rem; }
+        .app-card { background: #111118; border: 1px solid #1a1a2e; border-radius: 16px; padding: 2.5rem; }
+        .app-card h2 { margin-bottom: 1.5rem; font-size: 1.5rem; }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 0.4rem; font-size: 0.85rem; color: #aaa; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        textarea { width: 100%; min-height: 160px; background: #0a0a0f; border: 1px solid #2a2a3e; border-radius: 8px; padding: 1rem; color: #e0e0e0; font-size: 0.95rem; font-family: inherit; resize: vertical; }
+        textarea:focus { outline: none; border-color: #00d4aa; box-shadow: 0 0 0 3px rgba(0,212,170,0.1); }
+        textarea::placeholder { color: #444; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        select, input[type="text"] { width: 100%; background: #0a0a0f; border: 1px solid #2a2a3e; border-radius: 8px; padding: 0.8rem 1rem; color: #e0e0e0; font-size: 0.95rem; font-family: inherit; }
+        select:focus, input[type="text"]:focus { outline: none; border-color: #00d4aa; }
+        
+        .btn-primary { width: 100%; padding: 1rem; background: linear-gradient(135deg, #00d4aa, #00a8ff); color: #000; font-size: 1.1rem; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; margin-top: 1rem; transition: transform 0.15s, box-shadow 0.15s; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,212,170,0.3); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        
+        .demo-badge { text-align: center; margin-top: 0.8rem; font-size: 0.8rem; color: #666; }
+        .demo-badge span { color: #00d4aa; font-weight: 600; }
+        
+        /* Results */
+        .results-container { display: none; margin-top: 2rem; }
+        .results-container.active { display: block; }
+        
+        .verdict-bar { padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; text-align: center; }
+        .verdict-bar.overpriced { background: linear-gradient(135deg, rgba(255,59,48,0.15), rgba(255,149,0,0.1)); border: 1px solid rgba(255,59,48,0.3); }
+        .verdict-bar.fair { background: linear-gradient(135deg, rgba(0,212,170,0.1), rgba(0,168,255,0.1)); border: 1px solid rgba(0,212,170,0.3); }
+        .verdict-bar.good_deal { background: linear-gradient(135deg, rgba(52,199,89,0.15), rgba(0,212,170,0.1)); border: 1px solid rgba(52,199,89,0.3); }
+        .verdict-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: #888; }
+        .verdict-text { font-size: 2rem; font-weight: 800; margin: 0.3rem 0; }
+        .verdict-bar.overpriced .verdict-text { color: #ff3b30; }
+        .verdict-bar.fair .verdict-text { color: #00d4aa; }
+        .verdict-bar.good_deal .verdict-text { color: #34c759; }
+        .savings-text { font-size: 1.1rem; color: #fff; }
+        .savings-text strong { color: #00d4aa; }
+        
+        .line-items-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+        .line-items-table th { text-align: left; padding: 0.8rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #666; border-bottom: 1px solid #1a1a2e; }
+        .line-items-table td { padding: 0.8rem; border-bottom: 1px solid #111; font-size: 0.9rem; }
+        .status-badge { padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .status-badge.overpriced { background: rgba(255,59,48,0.15); color: #ff3b30; }
+        .status-badge.fair { background: rgba(0,212,170,0.1); color: #00d4aa; }
+        .status-badge.good_deal { background: rgba(52,199,89,0.15); color: #34c759; }
+        .status-badge.suspicious { background: rgba(255,149,0,0.15); color: #ff9500; }
+        
+        .flags-section { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+        .flag-card { padding: 1rem; border-radius: 8px; }
+        .flag-card.red { background: rgba(255,59,48,0.08); border: 1px solid rgba(255,59,48,0.2); }
+        .flag-card.green { background: rgba(52,199,89,0.08); border: 1px solid rgba(52,199,89,0.2); }
+        .flag-card h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+        .flag-card.red h4 { color: #ff3b30; }
+        .flag-card.green h4 { color: #34c759; }
+        .flag-card ul { list-style: none; padding: 0; }
+        .flag-card li { font-size: 0.85rem; padding: 0.3rem 0; color: #aaa; }
+        .flag-card li:before { content: "- "; color: #444; }
+        
+        .negotiation-box { background: #0a0a0f; border: 1px solid #2a2a3e; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; position: relative; }
+        .negotiation-box h4 { color: #00d4aa; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.8rem; }
+        .negotiation-box p { font-size: 0.95rem; color: #ccc; white-space: pre-wrap; }
+        .copy-btn { position: absolute; top: 1rem; right: 1rem; background: #1a1a2e; border: 1px solid #2a2a3e; color: #00d4aa; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+        .copy-btn:hover { background: #2a2a3e; }
+        
+        /* Pricing */
+        .pricing { max-width: 700px; margin: 4rem auto; padding: 0 2rem; text-align: center; }
+        .pricing h2 { font-size: 2rem; margin-bottom: 0.5rem; }
+        .pricing .subtitle { color: #666; margin-bottom: 2rem; }
+        .pricing-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .price-card { background: #111118; border: 1px solid #1a1a2e; border-radius: 12px; padding: 2rem; }
+        .price-card.featured { border-color: #00d4aa; position: relative; }
+        .price-card.featured::before { content: "BEST VALUE"; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #00d4aa; color: #000; padding: 0.2rem 0.8rem; border-radius: 4px; font-size: 0.7rem; font-weight: 800; letter-spacing: 1px; }
+        .price-amount { font-size: 2.5rem; font-weight: 800; color: #fff; }
+        .price-amount span { font-size: 1rem; color: #666; font-weight: 400; }
+        .price-card h3 { margin: 0.5rem 0; }
+        .price-card p { color: #666; font-size: 0.85rem; margin-bottom: 1.5rem; }
+        .price-card ul { list-style: none; text-align: left; margin-bottom: 1.5rem; }
+        .price-card li { padding: 0.3rem 0; font-size: 0.9rem; color: #aaa; }
+        .price-card li:before { content: "-> "; color: #00d4aa; }
+        .btn-checkout { width: 100%; padding: 0.8rem; background: transparent; border: 2px solid #00d4aa; color: #00d4aa; font-size: 0.95rem; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.15s; }
+        .btn-checkout:hover { background: #00d4aa; color: #000; }
+        .price-card.featured .btn-checkout { background: #00d4aa; color: #000; }
+        .price-card.featured .btn-checkout:hover { background: #00ffcc; }
+        
+        /* Paywall Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: #111118; border: 1px solid #2a2a3e; border-radius: 16px; padding: 2.5rem; max-width: 450px; width: 90%; text-align: center; }
+        .modal h3 { font-size: 1.3rem; margin-bottom: 0.5rem; }
+        .modal p { color: #888; margin-bottom: 1.5rem; }
+        .modal-btns { display: flex; flex-direction: column; gap: 0.8rem; }
+        
+        /* Loading */
+        .spinner { display: none; text-align: center; padding: 3rem; }
+        .spinner.active { display: block; }
+        .spinner-ring { width: 40px; height: 40px; border: 3px solid #1a1a2e; border-top-color: #00d4aa; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner p { color: #666; font-size: 0.9rem; }
+        
+        /* Footer */
+        footer { text-align: center; padding: 3rem 2rem; color: #444; font-size: 0.8rem; border-top: 1px solid #111; margin-top: 4rem; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .steps { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            .pricing-cards { grid-template-columns: 1fr; }
+            .flags-section { grid-template-columns: 1fr; }
+            .hero-stats { gap: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo"><span>Quote</span>Cop</div>
+        <div>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#analyze">Analyze</a>
+            <a href="#pricing">Pricing</a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <h1>Stop Getting <span class="highlight">Overcharged.</span><br>AI Analyzes Any Quote in 60 Seconds.</h1>
+        <p>Paste a quote from any contractor, mechanic, dentist, or service provider. QuoteCop checks every line item against fair market pricing and writes your negotiation script.</p>
+        <div class="hero-stats">
+            <div class="stat">
+                <div class="stat-num">$847</div>
+                <div class="stat-label">Avg. Savings Found</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">93%</div>
+                <div class="stat-label">Overcharge Detection</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">60s</div>
+                <div class="stat-label">Analysis Time</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works">
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">1</div>
+                <h3>Paste Your Quote</h3>
+                <p>Copy the quote or estimate you received. Photos work too -- just type out the line items.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <h3>AI Analyzes</h3>
+                <p>Our AI checks every line item against market pricing data for your area in real time.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <h3>Negotiate & Save</h3>
+                <p>Get a detailed breakdown with a ready-to-use negotiation script. Copy, send, and save money.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analyzer -->
+    <section id="analyze" class="app-section">
+        <div class="app-card">
+            <h2>Check Your Quote</h2>
+            <div class="form-group">
+                <label>Paste Your Quote or Estimate</label>
+                <textarea id="quoteText" placeholder="Example:
+Brake pad replacement (front): $450
+Rotor resurfacing (2): $280
+Brake fluid flush: $150
+Labor (2.5 hrs @ $120/hr): $300
+Shop supplies: $35
+Environmental fee: $25
+---
+Total: $1,240"></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Service Type</label>
+                    <select id="serviceType">
+                        <option value="auto_mechanic">Auto Mechanic</option>
+                        <option value="plumbing">Plumbing</option>
+                        <option value="electrical">Electrical</option>
+                        <option value="roofing">Roofing</option>
+                        <option value="hvac">HVAC</option>
+                        <option value="dental">Dental</option>
+                        <option value="home_renovation">Home Renovation</option>
+                        <option value="landscaping">Landscaping</option>
+                        <option value="moving">Moving</option>
+                        <option value="legal">Legal Services</option>
+                        <option value="general">Other / General</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Your Location</label>
+                    <input type="text" id="location" placeholder="e.g. Austin, TX or Los Angeles, CA">
+                </div>
+            </div>
+            <button class="btn-primary" id="analyzeBtn" onclick="analyzeQuote()">Analyze My Quote -- Free</button>
+            <div class="demo-badge" id="demoBadge"><span>1 free analysis</span> -- no signup required</div>
+            
+            <!-- Loading -->
+            <div class="spinner" id="spinner">
+                <div class="spinner-ring"></div>
+                <p>Analyzing your quote against market data...</p>
+            </div>
+            
+            <!-- Results -->
+            <div class="results-container" id="results"></div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" class="pricing">
+        <h2>Unlock Unlimited Checks</h2>
+        <p class="subtitle">One saved quote pays for a year of QuoteCop</p>
+        <div class="pricing-cards">
+            <div class="price-card">
+                <div class="price-amount">$2.99</div>
+                <h3>Single Check</h3>
+                <p>One detailed quote analysis</p>
+                <ul>
+                    <li>Full line-item breakdown</li>
+                    <li>Fair market pricing</li>
+                    <li>Negotiation script</li>
+                    <li>Red flag detection</li>
+                </ul>
+                <button class="btn-checkout" onclick="checkout('one_time')">Get One Check</button>
+            </div>
+            <div class="price-card featured">
+                <div class="price-amount">$9.99<span>/mo</span></div>
+                <h3>Unlimited Pro</h3>
+                <p>Check every quote you receive</p>
+                <ul>
+                    <li>Unlimited quote checks</li>
+                    <li>All single check features</li>
+                    <li>Priority analysis</li>
+                    <li>Cancel anytime</li>
+                </ul>
+                <button class="btn-checkout" onclick="checkout('subscription')">Start Pro</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Paywall Modal -->
+    <div class="modal-overlay" id="paywallModal">
+        <div class="modal">
+            <h3>Your Free Check is Used</h3>
+            <p>You just saw how much you could save. Unlock unlimited checks for less than the price of a coffee.</p>
+            <div class="modal-btns">
+                <button class="btn-primary" onclick="checkout('subscription')" style="margin-top:0">Unlock Unlimited -- $9.99/mo</button>
+                <button class="btn-checkout" onclick="checkout('one_time')">Just One More -- $2.99</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>QuoteCop &copy; 2026. AI-powered quote analysis. Not a substitute for professional advice.</p>
+    </footer>
+
+    <script>
+        let sessionId = localStorage.getItem('qc_session') || '';
+        
+        async function checkDemoStatus() {
+            try {
+                const res = await fetch('/api/demo-status');
+                const data = await res.json();
+                if (!data.demo_available && !sessionId) {
+                    document.getElementById('analyzeBtn').textContent = 'Analyze My Quote';
+                    document.getElementById('demoBadge').innerHTML = 'Free check used -- <a href="#pricing" style="color:#00d4aa">upgrade for unlimited</a>';
+                }
+            } catch(e) {}
+        }
+        
+        async function analyzeQuote() {
+            const quoteText = document.getElementById('quoteText').value.trim();
+            const serviceType = document.getElementById('serviceType').value;
+            const location = document.getElementById('location').value.trim() || 'United States';
+            
+            if (quoteText.length < 20) {
+                alert('Please paste a more detailed quote (at least a few line items).');
+                return;
+            }
+            
+            const btn = document.getElementById('analyzeBtn');
+            const spinner = document.getElementById('spinner');
+            const results = document.getElementById('results');
+            
+            btn.disabled = true;
+            btn.textContent = 'Analyzing...';
+            spinner.classList.add('active');
+            results.classList.remove('active');
+            
+            try {
+                const res = await fetch('/api/analyze-quote', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        quote_text: quoteText,
+                        service_type: serviceType,
+                        location: location,
+                        session_id: sessionId
+                    })
+                });
+                
+                if (res.status === 402) {
+                    document.getElementById('paywallModal').classList.add('active');
+                    spinner.classList.remove('active');
+                    btn.disabled = false;
+                    btn.textContent = 'Analyze My Quote';
+                    return;
+                }
+                
+                const data = await res.json();
+                if (data.success) {
+                    renderResults(data.analysis);
+                    if (data.demo_remaining === 0) {
+                        document.getElementById('demoBadge').innerHTML = 'Free check used -- <a href="#pricing" style="color:#00d4aa">upgrade for unlimited</a>';
+                        btn.textContent = 'Analyze My Quote';
+                    }
+                } else {
+                    alert(data.detail || 'Analysis failed. Please try again.');
+                }
+            } catch(e) {
+                alert('Something went wrong. Please try again.');
+            } finally {
+                spinner.classList.remove('active');
+                btn.disabled = false;
+                if (btn.textContent === 'Analyzing...') btn.textContent = 'Analyze My Quote -- Free';
+            }
+        }
+        
+        function renderResults(analysis) {
+            const results = document.getElementById('results');
+            const s = analysis.summary || {};
+            const verdictClass = (s.verdict || 'fair').toLowerCase();
+            
+            let lineItemsHTML = '';
+            (analysis.line_items || []).forEach(item => {
+                const statusClass = (item.status || 'fair').toLowerCase();
+                lineItemsHTML += `
+                    <tr>
+                        <td>${item.item || ''}</td>
+                        <td>$${(item.quoted_price || 0).toLocaleString()}</td>
+                        <td>$${(item.fair_range_low || 0).toLocaleString()} - $${(item.fair_range_high || 0).toLocaleString()}</td>
+                        <td><span class="status-badge ${statusClass}">${item.status || 'N/A'}</span></td>
+                        <td style="font-size:0.8rem;color:#888">${item.note || ''}</td>
+                    </tr>`;
+            });
+            
+            let redFlagsHTML = (analysis.red_flags || []).map(f => `<li>${f}</li>`).join('');
+            let greenFlagsHTML = (analysis.green_flags || []).map(f => `<li>${f}</li>`).join('');
+            let tipsHTML = (analysis.tips || []).map(t => `<li>${t}</li>`).join('');
+            
+            results.innerHTML = `
+                <div class="verdict-bar ${verdictClass}">
+                    <div class="verdict-label">Verdict</div>
+                    <div class="verdict-text">${(s.verdict || 'ANALYSIS COMPLETE').replace('_', ' ')}</div>
+                    <div class="savings-text">
+                        Quoted: <strong>$${(s.total_quoted || 0).toLocaleString()}</strong> | 
+                        Fair Value: <strong>$${(s.estimated_fair_total || 0).toLocaleString()}</strong> | 
+                        Potential Savings: <strong>$${(s.potential_savings || 0).toLocaleString()}</strong>
+                        (${s.savings_percentage || 0}%)
+                    </div>
+                </div>
+                
+                <h3 style="margin:1rem 0 0.5rem">Line Item Analysis</h3>
+                <div style="overflow-x:auto">
+                    <table class="line-items-table">
+                        <thead><tr><th>Item</th><th>Quoted</th><th>Fair Range</th><th>Status</th><th>Note</th></tr></thead>
+                        <tbody>${lineItemsHTML}</tbody>
+                    </table>
+                </div>
+                
+                <div class="flags-section">
+                    <div class="flag-card red">
+                        <h4>Red Flags</h4>
+                        <ul>${redFlagsHTML || '<li>None detected</li>'}</ul>
+                    </div>
+                    <div class="flag-card green">
+                        <h4>Green Flags</h4>
+                        <ul>${greenFlagsHTML || '<li>None noted</li>'}</ul>
+                    </div>
+                </div>
+                
+                <div class="negotiation-box">
+                    <h4>Your Negotiation Script</h4>
+                    <button class="copy-btn" onclick="copyScript()">Copy</button>
+                    <p id="negotiationScript">${analysis.negotiation_script || 'No script generated.'}</p>
+                </div>
+                
+                ${tipsHTML ? `<div style="margin-top:1.5rem"><h4 style="color:#00d4aa;font-size:0.85rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.5rem">Pro Tips</h4><ul style="list-style:none;padding:0">${tipsHTML}</ul></div>` : ''}
+            `;
+            results.classList.add('active');
+            results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        function copyScript() {
+            const script = document.getElementById('negotiationScript');
+            navigator.clipboard.writeText(script.textContent).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.textContent = 'Copied!';
+                setTimeout(() => btn.textContent = 'Copy', 2000);
+            });
+        }
+        
+        async function checkout(plan) {
+            document.getElementById('paywallModal').classList.remove('active');
+            try {
+                const res = await fetch('/create-checkout-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ plan: plan })
+                });
+                const data = await res.json();
+                if (data.checkout_url) {
+                    if (data.session_token) {
+                        localStorage.setItem('qc_session', data.session_token);
+                        sessionId = data.session_token;
+                    }
+                    window.location.href = data.checkout_url;
+                } else {
+                    alert('Failed to start checkout. Please try again.');
+                }
+            } catch(e) {
+                alert('Checkout error. Please try again.');
+            }
+        }
+        
+        // Check demo status on load
+        checkDemoStatus();
+    </script>
+</body>
+</html>
